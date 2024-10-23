@@ -1,0 +1,21 @@
+body{
+    background-color: blanchedalmond;
+}
+#container{
+    height: 200px;
+    width: 300px;
+    font-size: 16px;
+    border: 1px solid black;
+    color: blueviolet;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+#btn{
+    height: 40px;
+    width: 80px;
+    background-color: brown;
+    border-radius: 5px;
+}
