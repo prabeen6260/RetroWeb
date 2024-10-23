@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "CSS Changer Extension",
+  "name": "RetroWeb",
   "version": "1.0",
   "description": "A simple Chrome extension to change the CSS of websites.",
   "permissions": ["activeTab", "scripting"],
