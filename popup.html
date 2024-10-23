@@ -1,10 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>CSS Changer</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Select Color</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <h3>CSS Changer Active</h3>
-  <p>Click the extension icon to apply dark mode.</p>
+  <div id="button-container">
+    <button id="color0"></button>
+    <button id="color1"></button>
+    <button id="color2"></button>
+    <button id="color3"></button>
+  </div>
+  <div id="color-picker-container">
+    <label for="colorPicker">custom color:</label>
+    <input type="color" id="colorPicker" value="#f5cccc" />
+  </div>
+  <script src="background.js"></script>
 </body>
+
 </html>
