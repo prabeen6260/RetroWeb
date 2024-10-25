@@ -1,156 +1,108 @@
-// document.getElementById("btn").addEventListener("click", event => {
-//     changeBackground(event.target.value)
-//   })
-//   function changeBackground(color) {
-//     chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-//       chrome.scripting.executeScript({
-//         target: { tabId: tabs[0].id },
-//         function: changeBackgroundColor,
-//         args: [color],
-//       })
-//     })
-//   }
-//   function changeBackgroundColor(color) {
-//     document.body.style.backgroundColor = "red"
-//     document.body.style.border = "10px solid black"
-//   }
-
-
-
-// Event listener for the button click
-document.getElementById("btn").addEventListener("click", event => {
-    changeToRetroStyles();
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'callGeminiAPI') {
+      console.log("Calling Gemini API with extracted HTML and CSS.");
+      const { html, css } = message;
+      callGeminiAPI(html, css);
+    }
   });
   
-  // Function to remove existing styles and apply new retro styles
-  function changeToRetroStyles() {
-    chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-      chrome.scripting.executeScript({
-        target: { tabId: tabs[0].id },
-        function: applyRetroStyles,
-      });
-    });
-  }
+  // Function to call the Gemini API
+  async function callGeminiAPI(html, css) {
+    const apiKey = 'AIzaSyBCag4JyNXDZDsZhUdltv-ftc-0Jfcy7GM'; // Replace with your API key
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
   
-  // Function that will run in the context of the webpage to change the styles
-  function applyRetroStyles() {
-    // Remove all existing stylesheets
-    let stylesheets = document.querySelectorAll('link[rel="stylesheet"], style');
-    stylesheets.forEach(style => style.remove());
-  
-    // Apply new retro styles (CSS rules from the 90s)
-    const style = document.createElement('style');
-    style.innerHTML = `
-      /* Retro 90's style example */
-body, div, p, a, h1, h2, h3, h4, h5, h6, ul, ol {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* 90s-style body */
-body {
-    background-color: lightgray;
-    font-family: "Courier New", monospace;
-    color: black;
-    font-size: 16px;
-    line-height: 1.5;
-    margin: 20px;
-    padding: 10px;
-    border: none;
-}
-
-/* 90s Heading Styles */
-h1, h2, h3 {
-    color: blue;
-    text-align: center;
-    font-family: "Comic Sans MS", cursive, sans-serif;
-    margin: 10px 0;
-    text-shadow: 1px 1px yellow;
-}
-
-/* Paragraph styling - common in 90's websites */
-p {
-    color: green;
-    font-size: 14px;
-    line-height: 1.7;
-    padding: 10px;
-    background-color: white;
-    border: 1px solid black;
-    margin: 20px 0;
-}
-
-/* Links */
-a {
-    color: purple;
-    text-decoration: underline;
-    font-weight: bold;
-}
-
-/* Basic button styling */
-button {
-    font-family: "Courier New", monospace;
-    font-size: 16px;
-    padding: 10px;
-    background-color: yellow;
-    color: black;
-    border: 2px solid black;
-    cursor: pointer;
-    margin: 10px;
-}
-
-/* Inputs and form elements */
-input, select, textarea {
-    font-family: "Courier New", monospace;
-    font-size: 14px;
-    padding: 5px;
-    margin: 10px 0;
-    border: 2px solid black;
-}
-
-/* Images and tables */
-img, table {
-    border: 2px solid black;
-    margin: 10px;
-    padding: 5px;
-}
-
-/* Table Styling */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-    margin: 20px 0;
-}
-
-th, td {
-    border: 1px solid black;
-    padding: 10px;
-    text-align: left;
-}
-
-th {
-    background-color: yellow;
-    color: black;
-}
-
-td {
-    background-color: lightblue;
-}
-
-/* No border for divs by default */
-div {
-    border: none;
-}
-
-/* Horizontal rule styling */
-hr {
-    border: 1px solid black;
-    margin: 20px 0;
-}
-
+    // Create the prompt using the extracted HTML and CSS
+    const prompt = `
+        Here is the HTML and CSS of a webpage:
+        HTML:
+        ${html}
+        CSS:
+        ${css}
+        
+        Please modify this to give it a retro look with 90's style CSS.
     `;
-    
-    document.head.appendChild(style);
-  }
+    const data = {
+        contents: [{
+            parts: [{
+                text: prompt
+        }]
+    }]
+    };
+    return fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+        .then(response => response.json())
+        .then(data => {
+            // if(data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
+                console.log(data.candidates[0].content.parts[0].text);
+                const result = data.candidates[0].content.parts[0].text;
+            injectStylesToPage(result);
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            return { error: error.toString() };
+        });
+}
+
   
+//   // Function to apply the new styles to the page
+//   function applyStylesToPage(result) {
+//     chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+//       if (tabs[0]?.id) {
+//         chrome.scripting.executeScript({
+//           target: { tabId: tabs[0].id },
+//           function: applyNewStyles,
+//           args: [result]
+//         }).catch(error => {
+//           console.error('Error executing script:', error);
+//         });
+//       } else {
+//         console.error('No active tab found');
+//       }
+//     });
+//   }
+  
+//   // Function that applies the new styles to the webpage
+//   function applyNewStyles(newStyles) {
+//     try {
+//       const styleElement = document.createElement('style');
+//       styleElement.textContent = newStyles;
+//       document.head.appendChild(styleElement);
+//       console.log("Retro styles applied to the page.");
+//     } catch (error) {
+//       console.error('Error applying styles:', error);
+//     }
+//   }
+
+// Inject the retro styles into the active tab
+function injectStylesToPage(styles) {
+    chrome.windows.getLastFocused({ populate: true }, window => {
+        const activeTab = window.tabs.find(tab => tab.active);
+        
+        if (activeTab && activeTab.id) {
+            chrome.scripting.executeScript({
+                target: { tabId: activeTab.id },
+                func: injectCSSIntoPage,
+                args: [styles],
+            }, (result) => {
+                console.log("Retro styles injected successfully.", result);
+            }).catch(error => {
+                console.error('Error executing script:', error);
+            });
+        } else {
+            console.error('No active tab found.');
+        }
+    });
+}
+// Function that actually injects the styles into the current webpage
+function injectCSSIntoPage(newStyles) {
+    console.log("Injecting new styles:", newStyles);
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = newStyles;
+    document.head.appendChild(styleElement);
+    console.log("Styles applied to the page.");
+}

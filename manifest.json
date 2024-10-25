@@ -3,10 +3,15 @@
   "name": "RetroWeb",
   "version": "1.0",
   "description": "A simple Chrome extension to change the CSS of websites.",
-  "permissions": ["activeTab", "scripting"],
+  "permissions": ["activeTab", "scripting","tabs"],
   "background": {
     "service_worker": "background.js"
   },
+  "host_permissions": [
+    "https://*.googleapis.com/*",
+    "http://*/*", 
+    "https://*/*"
+  ],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
